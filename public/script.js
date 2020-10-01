@@ -1,3 +1,4 @@
+
 const socket = io("/");
 
 const videoGrid = document.getElementById("video-grid");
@@ -36,6 +37,25 @@ navigator.mediaDevices
         connectToNewUser(userId, stream);
       }, 5000);
     });
+
+    //get message using jquery
+let text = $('input')
+//to get user message when after clicking enter button
+//if the input pressing enter exist, you emit(send) value of the input
+//then clear input
+$('html').keydown((e) =>{
+  if(e.which == 13 && text.val().length !== 0) {
+    socket.emit('message', text.val());
+    text.val('')
+  }
+})
+
+socket.on('createMessage', message => {
+  //append messages to ul tags in html (ejs) file
+  console.log('create message', message)
+  $('ul').append(`<li class="message"><b>user</b><br/>${message}</li>`)
+  scrollToBottom()
+})
   });
 
 peer.on("open", (id) => {
@@ -52,11 +72,11 @@ const connectToNewUser = (userId, stream) => {
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   });
-  call.on('close', () => {
-    video.remove()
-  })
+  call.on("close", () => {
+    video.remove();
+  });
 
-  peer[userId] = call
+  peer[userId] = call;
 };
 
 const addVideoStream = (video, stream) => {
@@ -68,3 +88,8 @@ const addVideoStream = (video, stream) => {
   //put the video in html element on front end
   videoGrid.append(video);
 };
+
+const scrollToBottom = () => {
+  let d = $('.main__chat_window');
+  d.scrollTop(d.prop("scrollHeight"));
+}
